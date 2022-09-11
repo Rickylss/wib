@@ -8,7 +8,7 @@ import (
 func NewCreateCmd() *cobra.Command {
 	flags := &run.CreateFlags{}
 	cmd := &cobra.Command{
-		Use:   "create [base_img]",
+		Use:   "create [target_img]",
 		Short: "create windows image",
 		Long:  "create windows image",
 		Args:  cobra.ExactArgs(1),
@@ -23,11 +23,11 @@ func NewCreateCmd() *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(
-		&flags.OutPut,
-		"output",
-		"o",
-		run.DefaultOutPut,
-		"output image to file",
+		&flags.BaseImage,
+		"base",
+		"b",
+		run.DefaultBase,
+		"base image to file",
 	)
 
 	cmd.Flags().StringVarP(
@@ -43,6 +43,13 @@ func NewCreateCmd() *cobra.Command {
 		"release",
 		false,
 		"create release image",
+	)
+
+	cmd.Flags().StringVar(
+		&flags.ScriptsPath,
+		"scripts",
+		run.DefaultScriptsPath,
+		"scripts path for win image.",
 	)
 
 	return cmd

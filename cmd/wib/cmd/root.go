@@ -1,10 +1,17 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/Rickylss/wib/cmd/wib/run"
 	"github.com/Rickylss/wib/pkg/constants"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
+
+var cfgFile string
 
 func NewWinImgBuilderCmd() *cobra.Command {
 	flags := &run.Flags{}
@@ -27,14 +34,45 @@ func NewWinImgBuilderCmd() *cobra.Command {
 	}
 
 	root.PersistentFlags().StringVarP(
+		&cfgFile,
+		"config",
+		"c",
+		"",
+		`config file (default "$Home/.wib.yaml")`,
+	)
+
+	root.PersistentFlags().StringVarP(
 		&flags.LogLevel,
 		"loglevel",
 		"l",
 		run.DefaultLogLevel.String(),
 		"logrus log level [panic, fatal, error, warning, info, debug, trace]",
 	)
+	viper.BindPFlag("loglevel", root.PersistentFlags().Lookup("loglevel"))
 
 	root.AddCommand(NewCreateCmd())
 
 	return root
+}
+
+func init() {
+	cobra.OnInitialize(initConfig)
+}
+
+func initConfig() {
+	if cfgFile != "" {
+		viper.SetConfigFile(cfgFile)
+	} else {
+		home, err := homedir.Dir()
+		if err != nil {
+			os.Exit(1)
+		}
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".wib")
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		fmt.Printf("read failed: %s", err)
+		os.Exit(1)
+	}
 }
