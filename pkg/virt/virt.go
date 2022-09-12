@@ -49,10 +49,16 @@ func (v *VirtManager) GetIpByMac(network string, mac string) (string, error) {
 		return "", err
 	}
 
-	net, _ := conn.LookupNetworkByName("default")
-	leases, _ := net.GetDHCPLeases()
+	net, err := conn.LookupNetworkByName(network)
+	if err != nil {
+		return "", err
+	}
+	leases, err := net.GetDHCPLeases()
+	if err != nil {
+		return "", err
+	}
 	for _, lease := range leases {
-		if lease.Mac == "52:54:00:43:e3:36" {
+		if lease.Mac == mac {
 			return lease.IPaddr, nil
 		}
 	}

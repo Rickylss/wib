@@ -50,22 +50,21 @@ func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err e
 func (co *CreateOptions) CreateImage() error {
 
 	vm := virt.NewVirtManager()
-	dom, err := vm.StartVm()
+	_, err := vm.StartVm()
 	if err != nil {
 		return err
 	}
 
 	log.Debug("do something")
 
-	log.Debug("then destroy")
-	dom.Destroy()
-	// check image file
+	ip, err := vm.GetIpByMac("default", "52:54:00:43:e3:36")
+	if err != nil {
+		return err
+	}
 
-	// create vm from xml
+	log.Infof("ip:%s", ip)
 
-	// make external snapshot for vm by libvirt
-
-	// get vm ip address
+	//dom.Destroy()
 
 	// connect vm by ip:port passwd
 
