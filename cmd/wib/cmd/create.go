@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/Rickylss/wib/cmd/wib/run"
+	"github.com/Rickylss/wib/pkg/constants"
 	"github.com/spf13/cobra"
 )
 
@@ -26,29 +27,14 @@ func NewCreateCmd() *cobra.Command {
 		&flags.BaseImage,
 		"base",
 		"b",
-		run.DefaultBase,
+		constants.DefaultBase,
 		"base image to file",
-	)
-
-	cmd.Flags().StringVarP(
-		&flags.Size,
-		"size",
-		"s",
-		run.DefaultSize,
-		"create image size",
-	)
-
-	cmd.Flags().BoolVar(
-		&flags.Release,
-		"release",
-		false,
-		"create release image",
 	)
 
 	cmd.Flags().StringVar(
 		&flags.ScriptsPath,
 		"scripts",
-		run.DefaultScriptsPath,
+		constants.DefaultScriptsPath,
 		"scripts path for win image.",
 	)
 

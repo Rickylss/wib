@@ -1,17 +1,39 @@
 package vm
 
-import "github.com/Rickylss/wib/pkg/image"
+import "libvirt.org/go/libvirt"
 
-type VmSsh struct {
-	Ip      string
-	User    string
-	Passwd  string
-	SshPort int
-	SshKey  string
+type VM struct {
+	Name string
+	*SshContext
+	*Image
+	*libvirt.Domain
 }
 
-type Vm struct {
-	Name string
-	*VmSsh
-	image.Image
+func (vm *VM) Run(cmd string) error {
+	session, err := vm.SshContext.GetSession([]string{})
+	if err != nil {
+		return err
+	}
+	defer session.Close()
+
+	return session.Run(cmd)
+}
+
+func (vm *VM) Output(cmd string) ([]byte, error) {
+	session, err := vm.SshContext.GetSession([]string{})
+	if err != nil {
+		return nil, err
+	}
+	defer session.Close()
+
+	return session.Output(cmd)
+}
+
+func (vm *VM) GetImageSize() error {
+	_, err := vm.Domain.GetBlockInfo(vm.Image.Path, 0)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

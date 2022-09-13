@@ -1,40 +1,74 @@
 package virt
 
 import (
-	"fmt"
+	"path"
 
+	"github.com/Rickylss/wib/pkg/vm"
 	"libvirt.org/go/libvirt"
+	vx "libvirt.org/libvirt-go-xml"
 )
 
 type VirtManager struct {
 	URI string
 }
 
-func NewVirtManager() *VirtManager {
+func NewVirtManager(uri string) *VirtManager {
+	if uri == "" {
+		uri = "qemu:///system"
+	}
+
 	return &VirtManager{
-		URI: "qemu:///system",
+		URI: uri,
 	}
 }
 
-func (v *VirtManager) StartVm() (dom *libvirt.Domain, err error) {
+func (v *VirtManager) StartVm(domxml *vx.Domain) (m *vm.VM, err error) {
 	conn, err := libvirt.NewConnect(v.URI)
 	if err != nil {
 		return
 	}
+	defer conn.Close()
 
-	domcfg, err := GetDefaultXML()
+	xmldoc, err := domxml.Marshal()
 	if err != nil {
 		return
 	}
 
-	dom, err = conn.DomainCreateXML(domcfg, libvirt.DOMAIN_NONE)
+	dom, err := conn.DomainCreateXML(xmldoc, libvirt.DOMAIN_NONE)
 	if err != nil {
 		return
 	}
 
-	name, _ := dom.GetName()
+	name, err := dom.GetName()
+	if err != nil {
+		return
+	}
 
-	fmt.Printf("domain:%s is running\n", name)
+	firstDisk := domxml.Devices.Disks[0]
+	blkInfo, err := dom.GetBlockInfo(firstDisk.Source.File.File, 0)
+	if err != nil {
+		return
+	}
+
+	firstInterface := domxml.Devices.Interfaces[0]
+	ip, err := v.GetIpByMac(firstInterface.Source.Network.Network, firstInterface.MAC.Address)
+	if err != nil {
+		return
+	}
+
+	m = &vm.VM{
+		Name:   name,
+		Domain: dom,
+		Image: &vm.Image{
+			Name: path.Base(firstDisk.Source.File.File),
+			Path: firstDisk.Source.File.File,
+			Size: int(blkInfo.Physical),
+			Type: vm.ImageType(firstDisk.Driver.Type),
+		},
+		SshContext: &vm.SshContext{
+			Ip: ip,
+		},
+	}
 
 	return
 }

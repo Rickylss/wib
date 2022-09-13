@@ -45,12 +45,14 @@ func NewWinImgBuilderCmd() *cobra.Command {
 		&flags.LogLevel,
 		"loglevel",
 		"l",
-		run.DefaultLogLevel.String(),
+		constants.DefaultLogLevel.String(),
 		"logrus log level [panic, fatal, error, warning, info, debug, trace]",
 	)
 	viper.BindPFlag("loglevel", root.PersistentFlags().Lookup("loglevel"))
 
 	root.AddCommand(NewCreateCmd())
+	root.AddCommand(NewResizeCmd())
+	root.AddCommand(NewUploadCmd())
 
 	return root
 }

@@ -3,66 +3,56 @@ package run
 import (
 	"os"
 
-	"github.com/Rickylss/wib/pkg/constants"
-	"github.com/Rickylss/wib/pkg/image"
 	"github.com/Rickylss/wib/pkg/virt"
+	"github.com/Rickylss/wib/pkg/vm"
+	"github.com/Rickylss/wib/pkg/xml"
 
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	DefaultBase        = "win.img"
-	DefaultSize        = "40G"
-	DefaultScriptsPath = constants.WorkDir + "scripts.d"
-)
-
 type CreateFlags struct {
 	BaseImage   string
-	Size        string
-	Release     bool
 	ScriptsPath string
 }
 
 type CreateOptions struct {
 	*CreateFlags
-	Image image.Image
+	*vm.VM
 }
 
 func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err error) {
 
-	finfo, err := os.Stat(args[0])
-	if err != nil {
+	if _, err = os.Stat(args[0]); err != nil {
 		log.Errorf("os image file:%s do not exsit", args[0])
 		return
 	}
 
+	virtManager := virt.NewVirtManager("")
+
+	domxml, err := xml.GetDefaultXML()
+	if err != nil {
+		return
+	}
+
+	vm, err := virtManager.StartVm(domxml)
+	if err != nil {
+		return
+	}
+
+	vm.SshContext.User = 
+	vm.SshContext.Password = 
+	vm.SshContext.Port = 
+	vm.SshContext.Key = 
+
 	co = &CreateOptions{
 		CreateFlags: cf,
-		Image: &image.Qcow2Image{
-			Name: finfo.Name(),
-			Size: finfo.Size(),
-		},
+		VM:          vm,
 	}
 
 	return
 }
 
 func (co *CreateOptions) CreateImage() error {
-
-	vm := virt.NewVirtManager()
-	_, err := vm.StartVm()
-	if err != nil {
-		return err
-	}
-
-	log.Debug("do something")
-
-	ip, err := vm.GetIpByMac("default", "52:54:00:43:e3:36")
-	if err != nil {
-		return err
-	}
-
-	log.Infof("ip:%s", ip)
 
 	//dom.Destroy()
 
