@@ -2,6 +2,7 @@ package run
 
 import (
 	"os"
+	"time"
 
 	"github.com/Rickylss/wib/pkg/virt"
 	"github.com/Rickylss/wib/pkg/vm"
@@ -21,7 +22,6 @@ type CreateOptions struct {
 }
 
 func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err error) {
-
 	if _, err = os.Stat(args[0]); err != nil {
 		log.Errorf("os image file:%s do not exsit", args[0])
 		return
@@ -39,10 +39,10 @@ func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err e
 		return
 	}
 
-	vm.SshContext.User = 
-	vm.SshContext.Password = 
-	vm.SshContext.Port = 
-	vm.SshContext.Key = 
+	vm.SshContext.User = "Admin"
+	vm.SshContext.Password = "password"
+	vm.SshContext.Port = 22
+	vm.SshContext.Key = ""
 
 	co = &CreateOptions{
 		CreateFlags: cf,
@@ -53,12 +53,14 @@ func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err e
 }
 
 func (co *CreateOptions) CreateImage() error {
-
-	//dom.Destroy()
-
-	// connect vm by ip:port passwd
-
 	// apply scripts under /etc/wib/scripts.d in order
+	time.Sleep(time.Second * 10)
+	log.Infof("ip:%s, port:%s, passwd:%s", co.VM.Ip, co.VM.Port, co.VM.Password)
+	out, err := co.VM.Output("systeminfo")
+	if err != nil {
+		return err
+	}
+	log.Infof(string(out))
 
 	// stop vm destroy vm
 

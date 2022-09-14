@@ -51,6 +51,7 @@ func NewWinImgBuilderCmd() *cobra.Command {
 	viper.BindPFlag("loglevel", root.PersistentFlags().Lookup("loglevel"))
 
 	root.AddCommand(NewCreateCmd())
+	root.AddCommand(NewSshCmd())
 	root.AddCommand(NewResizeCmd())
 	root.AddCommand(NewUploadCmd())
 
