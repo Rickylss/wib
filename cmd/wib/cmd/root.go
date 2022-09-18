@@ -31,6 +31,9 @@ func NewWinImgBuilderCmd() *cobra.Command {
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return flags.SetLogLevel()
 		},
+		CompletionOptions: cobra.CompletionOptions{
+			DisableDefaultCmd: true,
+		},
 	}
 
 	root.PersistentFlags().StringVarP(
@@ -54,6 +57,11 @@ func NewWinImgBuilderCmd() *cobra.Command {
 	root.AddCommand(NewSshCmd())
 	root.AddCommand(NewResizeCmd())
 	root.AddCommand(NewUploadCmd())
+
+	root.SetHelpCommand(&cobra.Command{
+		Use:    "no-help",
+		Hidden: true,
+	})
 
 	return root
 }
