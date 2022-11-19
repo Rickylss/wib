@@ -9,13 +9,12 @@ import (
 
 const (
 	MemorySz = 4194304
-	VmName   = "win10-test"
 	VcpuN    = 4
 	Emulator = "/usr/bin/qemu-system-x86_64"
 )
 
 func GetDefaultXMLStr() (xmldoc string, err error) {
-	domcfg, err := GetDefaultXML()
+	domcfg, err := GetDefaultXML("", "")
 	if err != nil {
 		return
 	}
@@ -28,12 +27,12 @@ func GetDefaultXMLStr() (xmldoc string, err error) {
 	return
 }
 
-func GetDefaultXML() (xml *vx.Domain, err error) {
+func GetDefaultXML(vmName string, baseImage string) (xml *vx.Domain, err error) {
 	xml = &vx.Domain{
 		Type:  "kvm",
-		Name:  VmName,
+		Name:  vmName,
 		UUID:  uuid.New().String(),
-		Title: "wib",
+		Title: "wib-" + vmName,
 		Metadata: &vx.DomainMetadata{
 			XML: dedent.Dedent(`
             <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
@@ -84,7 +83,22 @@ func GetDefaultXML() (xml *vx.Domain, err error) {
 				Enabled: "no",
 			},
 		},
-		Devices: DefaultDeviceListXML(),
+		Devices: &vx.DomainDeviceList{
+			Emulator:    Emulator,
+			Disks:       DefaultDiskListXML(baseImage),
+			Controllers: DefaultControllerXML(),
+			Interfaces:  DefaultInterfaceXML(),
+			Serials:     DefaultSerialXML(),
+			Consoles:    DefaultConsoleXML(),
+			Channels:    DefaultChannelXML(),
+			Inputs:      DefaultInputXML(),
+			Graphics:    DefaultGraphicsXML(),
+			Sounds:      DefaultSoundXML(),
+			Audios:      DefaultAudioXML(),
+			Videos:      DefaultVideoXML(),
+			RedirDevs:   DefaultRedirdevXML(),
+			MemBalloon:  MemBalloonXML(),
+		},
 	}
 
 	return
@@ -136,26 +150,7 @@ func DefaultClockXML() *vx.DomainClock {
 	}
 }
 
-func DefaultDeviceListXML() *vx.DomainDeviceList {
-	return &vx.DomainDeviceList{
-		Emulator:    Emulator,
-		Disks:       DefaultDiskListXML(),
-		Controllers: DefaultControllerXML(),
-		Interfaces:  DefaultInterfaceXML(),
-		Serials:     DefaultSerialXML(),
-		Consoles:    DefaultConsoleXML(),
-		Channels:    DefaultChannelXML(),
-		Inputs:      DefaultInputXML(),
-		Graphics:    DefaultGraphicsXML(),
-		Sounds:      DefaultSoundXML(),
-		Audios:      DefaultAudioXML(),
-		Videos:      DefaultVideoXML(),
-		RedirDevs:   DefaultRedirdevXML(),
-		MemBalloon:  MemBalloonXML(),
-	}
-}
-
-func DefaultDiskListXML() []vx.DomainDisk {
+func DefaultDiskListXML(baseImage string) []vx.DomainDisk {
 	var controller uint = 0
 	var bus uint = 0
 	var target uint = 0
@@ -170,7 +165,7 @@ func DefaultDiskListXML() []vx.DomainDisk {
 			},
 			Source: &vx.DomainDiskSource{
 				File: &vx.DomainDiskSourceFile{
-					File: "/home/rickylss/repo/win10.qcow2",
+					File: baseImage,
 				},
 			},
 			BackingStore: &vx.DomainDiskBackingStore{},

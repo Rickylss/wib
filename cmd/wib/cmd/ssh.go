@@ -8,7 +8,7 @@ import (
 func NewSshCmd() *cobra.Command {
 	flags := &run.SshFlags{}
 	cmd := &cobra.Command{
-		Use:   "ssh [target_img]",
+		Use:   "ssh [cmd]",
 		Short: "ssh windows image",
 		Long:  "ssh windows image",
 		Args:  cobra.ExactArgs(1),

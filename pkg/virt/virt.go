@@ -51,7 +51,7 @@ func (v *VirtManager) StartVm(domxml *vx.Domain) (m *vm.VM, err error) {
 	}
 
 	firstInterface := domxml.Devices.Interfaces[0]
-	ip, err := v.GetIpByMac(firstInterface.Source.Network.Network, firstInterface.MAC.Address)
+	ip, err := v.GetInterfaceIp(firstInterface)
 	if err != nil {
 		return
 	}
@@ -77,11 +77,14 @@ func (v *VirtManager) StopVm(dom *libvirt.Domain) error {
 	return dom.Destroy()
 }
 
-func (v *VirtManager) GetIpByMac(network string, mac string) (string, error) {
+func (v *VirtManager) GetInterfaceIp(firstInterface vx.DomainInterface) (string, error) {
+	network := firstInterface.Source.Network.Network
+	mac := firstInterface.MAC.Address
 	conn, err := libvirt.NewConnect(v.URI)
 	if err != nil {
 		return "", err
 	}
+	defer conn.Close()
 
 	net, err := conn.LookupNetworkByName(network)
 	if err != nil {

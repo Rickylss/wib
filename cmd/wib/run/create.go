@@ -12,8 +12,9 @@ import (
 )
 
 type CreateFlags struct {
-	BaseImage   string
-	ScriptsPath string
+	BaseImage      string
+	ScriptsPath    string
+	VmStartTimeout int16
 }
 
 type CreateOptions struct {
@@ -28,9 +29,11 @@ func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err e
 		return
 	}
 
+	target := args[0]
+
 	virtManager := virt.NewVirtManager("")
 
-	domxml, err := xml.GetDefaultXML()
+	domxml, err := xml.GetDefaultXML(target, cf.BaseImage)
 	if err != nil {
 		return
 	}
@@ -56,13 +59,18 @@ func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err e
 
 func (co *CreateOptions) CreateImage() error {
 	// apply scripts under /etc/wib/scripts.d in order
-	time.Sleep(time.Second * 10)
 	log.Infof("ip:%s, port:%s, passwd:%s", co.VM.Ip, co.VM.Port, co.VM.Password)
-	out, err := co.VM.Output("systeminfo")
-	if err != nil {
-		return err
+
+	sleepTime := co.VmStartTimeout / 5
+	for i := 0; i < 5; i++ {
+		time.Sleep(time.Second * time.Duration(sleepTime))
+		out, err := co.VM.Output("systeminfo")
+		if err != nil {
+			continue
+		}
+		log.Infof(string(out))
+		break
 	}
-	log.Infof(string(out))
 
 	// stop vm destroy vm
 

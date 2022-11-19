@@ -30,12 +30,22 @@ func NewCreateCmd() *cobra.Command {
 		constants.DefaultBase,
 		"base image to file",
 	)
+	cmd.MarkFlagRequired("base")
 
-	cmd.Flags().StringVar(
+	cmd.Flags().StringVarP(
 		&flags.ScriptsPath,
 		"scripts",
+		"s",
 		constants.DefaultScriptsPath,
 		"scripts path for win image.",
+	)
+
+	cmd.Flags().Int16VarP(
+		&flags.VmStartTimeout,
+		"timeout",
+		"t",
+		30,
+		"timeout for vm start",
 	)
 
 	return cmd
