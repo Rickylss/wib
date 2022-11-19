@@ -1,0 +1,27 @@
+ninja_required_version = 1.10
+
+GOFLAGS = CGO_ENABLED=1
+WORKDIR = $$(pwd)
+OUTPUT = $WORKDIR/out
+
+rule lint
+  command = go vet ./...
+  description = go vet
+
+build lintoutput: lint
+
+rule unit
+  command = go test -cover -v -short ./...
+  description = go test
+
+build utest: unit
+
+rule compile
+  command = go mod tidy && $GOFLAGS go build -mod vendor -o $OUTPUT/$out $in && echo "$out build done."
+  description = compile %in
+
+build wib: compile .
+
+build all: phony wib
+
+default all

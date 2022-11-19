@@ -27,12 +27,12 @@ func NewWinImgBuilderCmd() *cobra.Command {
 			"windows vm image builder",
 		Version:      constants.Version,
 		SilenceUsage: true,
-		Args:         cobra.NoArgs,
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			return flags.SetLogLevel()
-		},
 		CompletionOptions: cobra.CompletionOptions{
 			DisableDefaultCmd: true,
+		},
+		Args: cobra.NoArgs,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return flags.SetLogLevel()
 		},
 	}
 
@@ -79,6 +79,7 @@ func initConfig() {
 			os.Exit(1)
 		}
 		viper.AddConfigPath(home)
+		viper.SetConfigType("yaml")
 		viper.SetConfigName(".wib")
 	}
 

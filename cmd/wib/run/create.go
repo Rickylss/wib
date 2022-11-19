@@ -1,7 +1,7 @@
 package run
 
 import (
-	"os"
+	"fmt"
 	"time"
 
 	"github.com/Rickylss/wib/pkg/virt"
@@ -19,11 +19,12 @@ type CreateFlags struct {
 type CreateOptions struct {
 	*CreateFlags
 	*vm.VM
+	TargetImage string
 }
 
 func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err error) {
-	if _, err = os.Stat(args[0]); err != nil {
-		log.Errorf("os image file:%s do not exsit", args[0])
+	if args[0] == "" {
+		err = fmt.Errorf("please specific a target image")
 		return
 	}
 
@@ -46,6 +47,7 @@ func (cf *CreateFlags) NewCreateOptions(args []string) (co *CreateOptions, err e
 
 	co = &CreateOptions{
 		CreateFlags: cf,
+		TargetImage: args[0],
 		VM:          vm,
 	}
 
